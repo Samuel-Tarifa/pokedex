@@ -31,7 +31,8 @@ func main() {
 			fmt.Printf("Unkown command\n")
 			continue
 		}
-		err := cmd.callback(&cliConfig)
+		params:=words[1:]
+		err := cmd.callback(&cliConfig,params)
 		if err != nil {
 			fmt.Printf("%v\n", err)
 		}
