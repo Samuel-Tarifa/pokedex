@@ -2,40 +2,54 @@ package pokeapi
 
 import (
 	"encoding/json"
-	"net/http"
+	"fmt"
 	"io"
+	"net/http"
+	"time"
+
+	"github.com/Samuel-Tarifa/pokedex/internal/pokecache"
 )
 
-func GetLocations(url string)([]string,string,string,error) {
-	res,err:=http.Get(url)
-	if err!=nil{
-		return []string{},"","",err
-	}
-	
+var cache = pokecache.NewCache(time.Minute)
+
+func GetLocations(url string) ([]string, string, string, error) {
 	var raw LocationsResponse
+	var body []byte
 
-	defer res.Body.Close()
+	val, ok := cache.Get(url)
 
-	body,err:=io.ReadAll(res.Body)
+	if ok {
+		body = val
+		fmt.Printf("Cache used on url:%s\n",url)
+	} else {
+		res, err := http.Get(url)
+		if err != nil {
+			return []string{}, "", "", err
+		}
 
-	if err!=nil{
-		return []string{},"","",err
+		defer res.Body.Close()
+
+		body, err = io.ReadAll(res.Body)
+		if err != nil {
+			return []string{}, "", "", err
+		}
+		cache.Add(url,body)
 	}
 
-	if err:=json.Unmarshal(body,&raw);err!=nil{
-		return []string{},"","",err
+	if err := json.Unmarshal(body, &raw); err != nil {
+		return []string{}, "", "", err
 	}
-	locations:=[]string{}
+	locations := []string{}
 
-	for _,name := range raw.Results{
-		locations=append(locations, name.Name)
+	for _, name := range raw.Results {
+		locations = append(locations, name.Name)
 	}
 
 	var prevUrl string
 
-	if raw.Previous != nil{
-		prevUrl=*raw.Previous
+	if raw.Previous != nil {
+		prevUrl = *raw.Previous
 	}
 
-	return locations,prevUrl,raw.Next,nil
+	return locations, prevUrl, raw.Next, nil
 }

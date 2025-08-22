@@ -47,6 +47,9 @@ func commandMap(cfg *config) error {
 }
 
 func commandMapb(cfg *config) error {
+	if cfg.Previous==nil || *cfg.Previous==""{
+		return fmt.Errorf("there is no previous page")
+	}
 	locations,previous,next,err:=pokeapi.GetLocations(*cfg.Previous)
 	if err!=nil{
 		return err

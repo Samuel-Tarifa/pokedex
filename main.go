@@ -12,7 +12,7 @@ type config struct {
 }
 
 var cliConfig = config{
-	Next:     "https://pokeapi.co/api/v2/location-area/",
+	Next:     "https://pokeapi.co/api/v2/location-area/?offset=0&limit=20",
 	Previous: nil,
 }
 
