@@ -4,28 +4,36 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strings"
 )
 
-func main(){
-	scanner:=bufio.NewScanner(os.Stdin)
-	for {
-		fmt.Print("Pokedex >")
-		if exit:=scanner.Scan(); !exit{
-			break
-		}
-		input:=scanner.Text()
-		words:=cleanInput(input)
-		fmt.Printf("Your comand was: %v\n", words[0])
-	}
+type config struct {
+	Next     string
+	Previous *string
 }
 
-func cleanInput (text string)[]string{
-	var result []string
-	for _,s:=range strings.Split(text, " "){
-		if s!=""{
-			result=append(result,strings.ToLower(s))
+var cliConfig = config{
+	Next:     "https://pokeapi.co/api/v2/location-area/",
+	Previous: nil,
+}
+
+func main() {
+	scanner := bufio.NewScanner(os.Stdin)
+	for {
+		fmt.Print("Pokedex >")
+		if exit := scanner.Scan(); !exit {
+			break
+		}
+		input := scanner.Text()
+		words := cleanInput(input)
+		command := words[0]
+		cmd, ok := commands[command]
+		if !ok {
+			fmt.Printf("Unkown command\n")
+			continue
+		}
+		err := cmd.callback(&cliConfig)
+		if err != nil {
+			fmt.Printf("%v\n", err)
 		}
 	}
-	return result
 }
