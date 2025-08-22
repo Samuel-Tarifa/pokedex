@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/Samuel-Tarifa/pokedex/internal/pokeapi"
+	"math"
+	"math/rand"
 	"os"
+
+	"github.com/Samuel-Tarifa/pokedex/internal/pokeapi"
 )
 
 type cliCommand struct {
@@ -65,7 +68,7 @@ func commandMapb(cfg *config, _ []string) error {
 	return nil
 }
 
-func commandExplore(cfg *config, params []string) error {
+func commandExplore(_ *config, params []string) error {
 	if len(params) == 0 {
 		return fmt.Errorf("you need to add an area name or id")
 	}
@@ -77,6 +80,30 @@ func commandExplore(cfg *config, params []string) error {
 	for _, pokemon := range pokemons {
 		fmt.Printf("%s\n", pokemon)
 	}
+	return nil
+}
+
+func commandCatch(cfg *config,params[]string) error{
+	if len(params) == 0 {
+		return fmt.Errorf("you need to add a pokemon name or id")
+	}
+	name:=params[0]
+	fmt.Printf("Throwing a Pokeball at %s...\n",name)
+	pokemon,err:=pokeapi.GetPokemon(name)
+	if err!=nil{
+		return err
+	}
+	throw:=rand.Intn(100)
+	chance:=math.Exp(-float64(pokemon.BaseExperience)/200)*100
+	success:=float64(throw)<=chance
+	if !success{
+		fmt.Printf("%s escaped!\n",name)
+		return nil
+	}
+	fmt.Printf("%s was caught!\n",name)
+	
+	cfg.Pokedex[pokemon.Name]=pokemon
+
 	return nil
 }
 
@@ -106,6 +133,11 @@ func init() {
 			name:        "explore",
 			description: "Gives a list of all the pokemons in a given location area",
 			callback:    commandExplore,
+		},
+		"catch":{
+			name: "catch",
+			description: "Tries to catch a pokemon to add it to the pokedex",
+			callback: commandCatch,
 		},
 	}
 }

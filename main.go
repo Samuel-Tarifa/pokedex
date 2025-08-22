@@ -4,16 +4,19 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"github.com/Samuel-Tarifa/pokedex/internal/pokeapi"
 )
 
 type config struct {
 	Next     string
 	Previous *string
+	Pokedex map[string]pokeapi.Pokemon
 }
 
 var cliConfig = config{
 	Next:     "https://pokeapi.co/api/v2/location-area/?offset=0&limit=20",
 	Previous: nil,
+	Pokedex: map[string]pokeapi.Pokemon{},
 }
 
 func main() {

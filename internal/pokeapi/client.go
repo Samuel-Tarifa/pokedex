@@ -20,7 +20,7 @@ func GetLocations(url string) ([]string, string, string, error) {
 
 	if ok {
 		body = val
-		fmt.Printf("Cache used on url:%s\n", url)
+		fmt.Printf("\nCache used on url:%s\n", url)
 	} else {
 		res, err := http.Get(url)
 		if err != nil {
@@ -65,7 +65,7 @@ func GetPokemonsInArea(area string) ([]string, error) {
 
 	if ok {
 		body = val
-		fmt.Printf("Cache used on url:%s\n", url)
+		fmt.Printf("\nCache used on url:%s\n", url)
 
 	} else {
 
@@ -97,4 +97,41 @@ func GetPokemonsInArea(area string) ([]string, error) {
 	}
 
 	return pokemons, nil
+}
+
+var APIPokemon = "https://pokeapi.co/api/v2/pokemon/"
+
+func GetPokemon(name string) (Pokemon, error) {
+	url := APIPokemon + name
+
+	var body []byte
+	var data =Pokemon{}
+
+	val, ok := cache.Get(url)
+
+	if ok {
+		body = val
+		fmt.Printf("\nCache used on url: %s\n", url)
+	} else {
+		res, err := http.Get(url)
+		if err != nil {
+			return Pokemon{}, err
+		}
+
+		fmt.Printf("Response code: %v\n", res.StatusCode)
+		
+		defer res.Body.Close()
+		body, err = io.ReadAll(res.Body)
+		if err != nil {
+			return Pokemon{}, err
+		}
+
+		cache.Add(url, body)
+	}
+
+	if err := json.Unmarshal(body, &data); err != nil {
+		return Pokemon{}, err
+	}
+
+	return data, nil
 }
