@@ -117,8 +117,6 @@ func GetPokemon(name string) (Pokemon, error) {
 		if err != nil {
 			return Pokemon{}, err
 		}
-
-		fmt.Printf("Response code: %v\n", res.StatusCode)
 		
 		defer res.Body.Close()
 		body, err = io.ReadAll(res.Body)

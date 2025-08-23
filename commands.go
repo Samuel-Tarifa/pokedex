@@ -101,9 +101,51 @@ func commandCatch(cfg *config,params[]string) error{
 		return nil
 	}
 	fmt.Printf("%s was caught!\n",name)
+	fmt.Printf("You may now inspect it with the inspect command.\n")
 	
 	cfg.Pokedex[pokemon.Name]=pokemon
 
+	return nil
+}
+
+func commandInspect(cfg *config,params []string)error{
+	if len(params)==0{
+		fmt.Printf("Add a pokemon name to inspect")
+		return nil
+	}
+	name:=params[0]
+	pokemon,ok:=cfg.Pokedex[name]
+	if !ok{
+		fmt.Printf("You have not caught that pokemon\n")
+		return nil
+	}
+	fmt.Printf("Name: %s\n",pokemon.Name)
+	fmt.Printf("Height: %v\n",pokemon.Height)
+	fmt.Printf("Wheight: %v\n",pokemon.Weight)
+	fmt.Print("Stats:\n")
+	for _,stat:=range pokemon.Stats{
+		value:=stat.BaseStat
+		key:=stat.Stat.Name
+		fmt.Printf("	-%s: %v\n",key,value)
+	}
+	fmt.Printf("Types:\n")
+	for _,pokemonType:=range pokemon.Types{
+		name:=pokemonType.Type.Name
+		fmt.Printf("	- %s\n",name)
+	}
+	return nil
+}
+
+func commandPokedex(cfg *config,_ []string) error{
+	pokedex:=cfg.Pokedex
+	if len(pokedex)==0{
+		fmt.Printf("You don't have pokemons in your pokedex yet!\n")
+		return nil
+	}
+	fmt.Printf("Your Pokedex:\n")
+	for name:=range pokedex{
+		fmt.Printf("	- %s\n",name)
+	}
 	return nil
 }
 
@@ -138,6 +180,16 @@ func init() {
 			name: "catch",
 			description: "Tries to catch a pokemon to add it to the pokedex",
 			callback: commandCatch,
+		},
+		"inspect":{
+			name:"inspect",
+			description: "If the pokemon is in your pokedex, print information about your pokemon",
+			callback: commandInspect,
+		},
+		"pokedex":{
+			name: "pokedex",
+			description: "List the pokemon you have in your pokedex.",
+			callback: commandPokedex,
 		},
 	}
 }
